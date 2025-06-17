@@ -1,0 +1,11 @@
+
+<form (submit)="submitForm()" class="w-full lg:w-[550px] mx-auto">
+  <div>
+    <label for="statement">Statement:</label>
+    <textarea [value]="statement()" (change)="onStatementChange($event)" class="border w-full h-[200px] rounded-md border-neutral-500 p-2" id="statement"></textarea>
+  </div>
+
+  <div class="flex justify-end mt-20">
+    <button type="submit" class="px-8 py-2 bg-neutral-900 text-white rounded-sm cursor-pointer">{{fetchingFromAPI() ? "Loading..." : "Submit"}}</button>
+  </div>
+</form>
