@@ -1,0 +1,12 @@
+
+@if (statementScoreService.statementScores().length > 0) {
+  <div class="w-full lg:w-[550px] mx-auto p-4 bg-neutral-100 rounded-lg">
+    <div>
+      <p class="text-sm">SCORE: </p>
+    </div>
+    <div class="mt-2">
+      <h1 class="text-3xl font-medium">{{ statementScore() }}</h1>
+      <p>{{ statementLabel() }}</p>
+    </div>
+  </div>
+}
