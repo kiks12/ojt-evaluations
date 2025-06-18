@@ -1,0 +1,28 @@
+
+<div>
+  <div class="w-full flex items-center justify-between">
+    <div>
+      <h1 class="text-xl font-semibold">All your forms</h1>
+    </div>
+    <div>
+      <button class="px-8 py-2 rounded-lg bg-neutral-900 text-white" (click)="formsService.toggleAddFormModal()">Add Form</button>
+    </div>
+  </div>
+
+  @if (formsService.forms().length > 0) {
+    <div class="mt-8 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      @for (item of formsService.forms(); track $index) {
+        <app-form-card [form]="item"/>
+      }
+    </div>
+  } @else {
+    <div class="w-full h-[500px] flex flex-col items-center justify-center">
+      <h1 class="text-4xl font-bold">No Forms!</h1>
+      <p>You do not have any forms, please create one</p>
+    </div>
+  }
+  
+  @if (formsService.showAddFormModal()) {
+    <app-form-modal />
+  }
+</div>
