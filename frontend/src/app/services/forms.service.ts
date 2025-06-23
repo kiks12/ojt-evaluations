@@ -3,13 +3,14 @@ import { addDoc, collection, getDocs } from "firebase/firestore"
 import { firestore } from '../../../firebase/firebase';
 import { FORMS } from '../../../firebase/collections';
 import { Form } from '../types/form';
+import { FormData } from '../components/forms/components/form-card/form-card.component';
 
 @Injectable({
   providedIn: 'root'
 })
 export class FormsService {
   showAddFormModal = signal(false)
-  forms = signal<Form[]>([])
+  forms = signal<FormData[]>([])
 
   constructor() { }
 
@@ -32,7 +33,13 @@ export class FormsService {
     try {
       const querySnapshot = await getDocs(collection(firestore, FORMS))
       console.log(querySnapshot.docs.map((doc) => doc.data() as Form));
-      this.forms.set(querySnapshot.docs.map((doc) => doc.data() as Form));
+      this.forms.set(querySnapshot.docs.map((doc) => {
+        const data = doc.data() as Form
+        return {
+          ...data,
+          createdAt: data.createdAt.toDate()
+        } as FormData
+      }));
     } catch (error) {
       console.error(error)    
       return

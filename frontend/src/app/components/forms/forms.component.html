@@ -12,7 +12,7 @@
   @if (formsService.forms().length > 0) {
     <div class="mt-8 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
       @for (item of formsService.forms(); track $index) {
-        <app-form-card [form]="item"/>
+        <app-form-card [form]="item"></app-form-card>
       }
     </div>
   } @else {
