@@ -1,0 +1,133 @@
+/* Active link styles */
+.active-link {
+  @apply text-blue-600 bg-blue-50 border-blue-200;
+}
+
+.mobile-active-link {
+  @apply text-blue-600 bg-blue-50;
+}
+
+/* Navigation link transitions */
+.nav-link {
+  position: relative;
+  transition: all 0.2s ease-in-out;
+}
+
+.nav-link:hover {
+  transform: translateY(-1px);
+}
+
+.mobile-nav-link {
+  transition: all 0.2s ease-in-out;
+}
+
+/* User menu animation */
+.user-menu-enter {
+  opacity: 0;
+  transform: scale(0.95) translateY(-10px);
+}
+
+.user-menu-enter-active {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+  transition: opacity 150ms ease-out, transform 150ms ease-out;
+}
+
+/* Mobile menu slide animation */
+.mobile-menu-enter {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+.mobile-menu-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 200ms ease-out, transform 200ms ease-out;
+}
+
+/* Search input focus styles */
+input[type="text"]:focus {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Sticky header backdrop blur effect */
+.header-backdrop {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* Logo animation */
+.logo-container:hover .logo-icon {
+  transform: rotate(5deg) scale(1.05);
+  transition: transform 0.2s ease-in-out;
+}
+
+/* Responsive utilities */
+@media (max-width: 768px) {
+  .search-mobile {
+    width: 100%;
+  }
+}
+
+/* Custom scrollbar for mobile menu */
+.mobile-menu::-webkit-scrollbar {
+  width: 4px;
+}
+
+.mobile-menu::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.mobile-menu::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 2px;
+}
+
+.mobile-menu::-webkit-scrollbar-thumb:hover {
+  background: #a1a1a1;
+}
+
+/* Notification badge (for future use) */
+.notification-badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  background: #ef4444;
+  color: white;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Focus styles for keyboard navigation */
+button:focus,
+a:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .nav-link {
+    border: 1px solid transparent;
+  }
+  
+  .nav-link:hover,
+  .nav-link:focus {
+    border-color: currentColor;
+  }
+}
