@@ -60,7 +60,7 @@ export class FormCardComponent {
     this.closeDropdown();
     // this.edit.emit(this.form);
     // Alternative: Navigate directly
-    // this.router.navigate(['/forms', this.form.id || this.form.title]);
+    this.router.navigate(['/forms', this.form.id || this.form.title]);
   }
 
   onDelete(event?: Event) {
