@@ -1,9 +1,10 @@
 import { Injectable, signal } from '@angular/core';
-import { addDoc, collection, getDocs } from "firebase/firestore"
+import { addDoc, collection, doc, getDocs, setDoc } from "firebase/firestore"
 import { firestore } from '../../../firebase/firebase';
 import { FORMS } from '../../../firebase/collections';
 import { Form } from '../types/form';
 import { FormData } from '../components/forms/components/form-card/form-card.component';
+import {v4 as uuidv4} from 'uuid';
 
 @Injectable({
   providedIn: 'root'
@@ -20,7 +21,11 @@ export class FormsService {
 
   async createForm(form: Form) : Promise<{success: boolean, error?: unknown | undefined}> {
     try {
-      const createdDocument = await addDoc(collection(firestore, FORMS), form)
+      const newUuid = uuidv4()
+      const createdDocument = await  setDoc(doc(firestore, FORMS, newUuid), {
+        id: newUuid,
+        ...form
+      });
       console.log(createdDocument)
       return { success: true }
     } catch (error) {
