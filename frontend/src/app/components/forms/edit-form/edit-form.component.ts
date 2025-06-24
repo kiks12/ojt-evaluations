@@ -1,41 +1,31 @@
-import { Component, signal, WritableSignal } from '@angular/core';
-
-interface EvaluationCriterion {
-  id: string;
-  label: string;
-  type: 'text' | 'textarea' | 'rating' | 'checkbox' | 'radio' | 'select';
-  required: boolean;
-  options?: string[];
-}
-
-interface FormStructure {
-  title: string;
-  description: string;
-  criteria: EvaluationCriterion[];
-}
+import { Component, inject, OnInit } from '@angular/core';
+import { FormsService } from '../../../services/forms.service';
+import { ActivatedRoute } from '@angular/router';
+import { EvaluationCriterion, FormStructure } from '../../../types/form';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { Timestamp } from 'firebase/firestore';
 
 @Component({
   selector: 'app-edit-form',
-  imports: [],
+  imports: [CommonModule, FormsModule],
   templateUrl: './edit-form.component.html',
   styleUrl: './edit-form.component.css'
 })
-export class EditFormComponent {
-  formStructure: WritableSignal<FormStructure> = signal<FormStructure>({
+export class EditFormComponent implements OnInit {
+  formsService = inject(FormsService);
+  formStructure: FormStructure = {
     title: '',
     description: '',
     criteria: []
-  });
-
+  };
   newCriterion: Partial<EvaluationCriterion> = {
     label: '',
     type: 'text',
     required: false,
     options: []
   };
-
   optionInput = '';
-
   inputTypes = [
     { value: 'text', label: 'Text Input' },
     { value: 'textarea', label: 'Text Area' },
@@ -44,6 +34,20 @@ export class EditFormComponent {
     { value: 'radio', label: 'Radio Buttons' },
     { value: 'select', label: 'Dropdown Select' }
   ];
+
+  constructor(private route: ActivatedRoute) {}
+
+  ngOnInit(): void {
+    this.route.paramMap.subscribe(async params => {
+      const formUuid = params.get("id");
+      if (!formUuid) return alert("Form UUID does not exist");
+      const result = await this.formsService.getForm(formUuid);
+      if (!result) return alert("Form not found");
+      this.formStructure = {
+        ...result,
+      }
+    })
+  }
 
   addCriterion(): void {
     if (!this.newCriterion.label) return;
@@ -56,7 +60,7 @@ export class EditFormComponent {
       options: this.newCriterion.options || []
     };
 
-    this.formStructure().criteria.push(criterion);
+    this.formStructure.criteria.push(criterion);
 
     this.newCriterion = {
       label: '',
@@ -68,7 +72,7 @@ export class EditFormComponent {
   }
 
   removeCriterion(id: string): void {
-    this.formStructure().criteria = this.formStructure().criteria.filter(c => c.id !== id);
+    this.formStructure.criteria = this.formStructure.criteria.filter(c => c.id !== id);
   }
 
   addOption(): void {
@@ -88,7 +92,7 @@ export class EditFormComponent {
   }
 
   onTypeChange(): void {
-    this.newCriterion.options = [];
+    this.newCriterion.options = []
     this.optionInput = '';
   }
 
@@ -104,13 +108,19 @@ export class EditFormComponent {
     return true;
   }
 
-  saveForm(): void {
-    console.log('Form Structure:', this.formStructure);
+  async saveForm(): Promise<void> {
+    const updatedForm : FormStructure = {
+      ...this.formStructure,
+      updatedAt: Timestamp.now()
+    }
+    console.log('Form Structure:', updatedForm);
     alert('Form structure saved! Check console for details.');
+    const {success, error} = await this.formsService.updateForm(this.formStructure);
+    if (error) alert(error);
   }
 
   canSaveForm(): boolean {
-    return !!(this.formStructure().title && this.formStructure().criteria.length > 0);
+    return !!(this.formStructure.title && this.formStructure.criteria.length > 0);
   }
 
   getRatingArray(): number[] {

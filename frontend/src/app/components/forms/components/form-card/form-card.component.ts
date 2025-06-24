@@ -1,17 +1,9 @@
-import { CommonModule } from '@angular/common';
-import { Component, Input, Output, EventEmitter, HostListener } from '@angular/core';
+import { CommonModule, Time } from '@angular/common';
+import { Component, Input, Output, EventEmitter, HostListener, inject } from '@angular/core';
 import { Router } from '@angular/router';
-
-export interface FormData {
-  id?: string;
-  title: string;
-  description: string;
-  status?: 'active' | 'draft' | 'archived';
-  criteria?: any[];
-  responses?: number;
-  createdAt?: Date | string;
-  updatedAt?: Date | string;
-}
+import { FormData } from '../../../../types/form';
+import { Timestamp } from 'firebase/firestore';
+import { TimeUtilityService } from '../../../../services/time-utility.service';
 
 @Component({
   selector: 'app-form-card',
@@ -21,13 +13,14 @@ export interface FormData {
 })
 export class FormCardComponent {
   @Input() form!: FormData;
-  @Output() delete? = new EventEmitter<FormData>();
+  @Output() delete = new EventEmitter<FormData>();
   @Output() edit? = new EventEmitter<FormData>();
   @Output() duplicate? = new EventEmitter<FormData>();
   @Output() share? = new EventEmitter<FormData>();
   @Output() preview? = new EventEmitter<FormData>();
   @Output() analytics? = new EventEmitter<FormData>();
   @Output() cardClick? = new EventEmitter<FormData>();
+  timeUtilService = inject(TimeUtilityService);
 
   showDropdown = false;
 
@@ -70,9 +63,7 @@ export class FormCardComponent {
     this.closeDropdown();
     
     // Show confirmation dialog
-    if (confirm(`Are you sure you want to delete "${this.form.title}"? This action cannot be undone.`)) {
-      // this.delete.emit(this.form);
-    }
+    if (this.delete) this.delete.emit(this.form);
   }
 
   onDuplicate(event?: Event) {
@@ -110,20 +101,5 @@ export class FormCardComponent {
       case 'archived': return 'Archived';
       default: return 'Draft';
     }
-  }
-
-  getRelativeTime(date?: Date | string): string {
-    if (!date) return 'Unknown';
-    
-    const now = new Date();
-    const targetDate = new Date(date);
-    const diffInSeconds = Math.floor((now.getTime() - targetDate.getTime()) / 1000);
-    
-    if (diffInSeconds < 60) return 'Just now';
-    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
-    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
-    if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)}d ago`;
-    
-    return targetDate.toLocaleDateString();
   }
 }

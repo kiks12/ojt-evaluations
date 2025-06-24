@@ -1,9 +1,11 @@
-import { Component, OnInit, HostListener } from '@angular/core';
+import { Component, OnInit, HostListener, signal, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsService } from '../../services/forms.service';
-import { FormCardComponent, FormData } from './components/form-card/form-card.component';
+import { FormCardComponent } from './components/form-card/form-card.component';
 import { CommonModule } from '@angular/common';
 import { FormModalComponent } from './components/form-modal/form-modal.component';
+import { FormData } from '../../types/form';
+import { TimeUtilityService } from '../../services/time-utility.service';
 
 @Component({
   selector: 'app-forms-page',
@@ -12,7 +14,8 @@ import { FormModalComponent } from './components/form-modal/form-modal.component
   imports: [FormModalComponent, FormCardComponent, CommonModule]
 })
 export class FormsComponent implements OnInit {
-  searchQuery = '';
+  timeUtilityService = inject(TimeUtilityService);
+  searchQuery = signal('');
   viewMode: 'grid' | 'list' = 'grid';
   showFilterMenu = false;
   activeFilters: string[] = [];
@@ -65,7 +68,9 @@ export class FormsComponent implements OnInit {
     return 'Create, manage, and analyze your OJT evaluation forms';
   }
 
-  onSearch() {
+  onSearch(event: Event) {
+    const target = event.target as HTMLInputElement;
+    this.searchQuery.set(target.value);
     this.currentPage = 1;
     this.updatePagination();
   }
@@ -117,11 +122,10 @@ export class FormsComponent implements OnInit {
 
   getFilteredForms(): FormData[] {
     let filtered = this.formsService.forms();
-    console.log("Filtered: ", filtered);
 
     // Apply search filter
-    if (this.searchQuery.trim()) {
-      const query = this.searchQuery.toLowerCase();
+    if (this.searchQuery().trim()) {
+      const query = this.searchQuery().toLowerCase();
       filtered = filtered.filter((form: FormData) =>
         form.title.toLowerCase().includes(query) ||
         form.description.toLowerCase().includes(query)
@@ -144,8 +148,8 @@ export class FormsComponent implements OnInit {
   getTotalForms(): number {
     let filtered = this.formsService.forms();
 
-    if (this.searchQuery.trim()) {
-      const query = this.searchQuery.toLowerCase();
+    if (this.searchQuery().trim()) {
+      const query = this.searchQuery().toLowerCase();
       filtered = filtered.filter((form: FormData) =>
         form.title.toLowerCase().includes(query) ||
         form.description.toLowerCase().includes(query)
@@ -196,7 +200,7 @@ export class FormsComponent implements OnInit {
   }
 
   clearSearchAndFilters() {
-    this.searchQuery = '';
+    this.searchQuery.set(''); 
     this.activeFilters = [];
     this.currentPage = 1;
     this.updatePagination();
@@ -207,10 +211,13 @@ export class FormsComponent implements OnInit {
     this.router.navigate(['/forms', form.id, 'edit']);
   }
 
-  onDeleteForm(form: FormData) {
+  async onDeleteForm(form: FormData) {
+    if (!form.id) return alert("Form ID does not exist");
     if (confirm(`Are you sure you want to delete "${form.title}"?`)) {
-      // Handle delete logic
-      console.log('Deleting form:', form);
+      const { success, error } = await this.formsService.deleteForm(form.id);
+      if (error) return alert(error);
+      if (success) this.formsService.getForms();
+      alert("Successfully deleted form");
     }
   }
 
@@ -235,20 +242,5 @@ export class FormsComponent implements OnInit {
   getStatusLabel(status: string | undefined): string {
     const option = this.statusOptions.find(opt => opt.value === status);
     return option ? option.label : status ?? "No Status";
-  }
-
-  getRelativeTime(date: Date | string | undefined): string {
-    if (!date) return 'Unknown';
-    
-    const now = new Date();
-    const targetDate = new Date(date);
-    const diffInSeconds = Math.floor((now.getTime() - targetDate.getTime()) / 1000);
-    
-    if (diffInSeconds < 60) return 'Just now';
-    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
-    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
-    if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)}d ago`;
-    
-    return targetDate.toLocaleDateString();
   }
 }

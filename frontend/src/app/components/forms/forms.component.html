@@ -1,6 +1,6 @@
 <div class="min-h-screen">
   <!-- Header Section -->
-  <div class="bg-white border-b border-gray-200">
+  <div class="bg-white border-gray-200">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <!-- Title and Stats -->
@@ -37,7 +37,9 @@
                 type="text"
                 placeholder="Search forms..."
                 class="block w-64 pl-10 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                (input)="onSearch()">
+                (input)="onSearch($event)"
+                [value]="this.searchQuery()"
+                >
             </div>
 
             <!-- Filter Dropdown -->
@@ -153,7 +155,10 @@
            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
         <app-form-card 
           *ngFor="let form of getFilteredForms(); track form"
-          [form]="form"></app-form-card>
+          [form]="form"
+          (delete)="this.onDeleteForm(form)"
+        >
+        </app-form-card>
       </div>
 
       <!-- List View -->
@@ -198,7 +203,7 @@
                 {{ form.responses || 0 }}
               </div>
               <div class="col-span-2 text-sm text-gray-500">
-                {{ getRelativeTime(form.updatedAt) }}
+                {{ this.timeUtilityService.getRelativeTime(form.updatedAt) }}
               </div>
               <div class="col-span-2">
                 <div class="flex items-center gap-2">

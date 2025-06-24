@@ -28,7 +28,7 @@ export class FormModalComponent {
     const { success, error } = await this.formsService.createForm({
       title: this.title(),
       description: this.description(),
-      createdAt: Timestamp.now()
+      createdAt: Timestamp.now(),
     })
     this.loadingSubmit.set(false)
     if (!success) {
