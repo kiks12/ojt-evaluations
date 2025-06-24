@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 import { Component, HostListener, Output, EventEmitter } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 
@@ -11,7 +12,7 @@ interface User {
   selector: 'app-header',
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.css'],
-  imports: [RouterLink]
+  imports: [RouterLink, CommonModule]
 })
 export class HeaderComponent {
   @Output() search = new EventEmitter<string>();
