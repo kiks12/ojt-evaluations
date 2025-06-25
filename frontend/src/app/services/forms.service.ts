@@ -22,7 +22,13 @@ export class FormsService {
     try {
       const document = await getDoc(doc(firestore, FORMS, id));
       const criteriaDocuments = await getDocs(collection(firestore, FORMS, id, CRITERIAS));
-      const criteria = criteriaDocuments.docs.map((doc) => doc.data() as EvaluationCriterion);
+      const criteria = criteriaDocuments.docs.map((doc) => {
+        const criterion = doc.data() as EvaluationCriterion;
+        criterion.answer = criterion.answer || [];
+        criterion.userAnswer = criterion.userAnswer || [];
+        criterion.saved = true; // Criteria from database are saved
+        return criterion;
+      });
       return {
         ...(document.data() as FormStructure),
         criteria: criteria
@@ -60,9 +66,8 @@ export class FormsService {
     try {
       const { criteria, ...rest } = form
       const criteriaResults = await Promise.all(criteria.map(async (c) => await this.setCriteria(form.id!!, c)))
-      console.log(criteriaResults)
       const result = await setDoc(doc(firestore, FORMS, form.id!!), rest);
-      if (criteriaResults.every((c) => c.success) && result) return { success: true };
+      if (criteriaResults.every((c) => c.success)) return { success: true };
       return { success: false, error: criteriaResults.map((c) => c.error)}
     } catch (error) {
       return { success: false, error }
@@ -79,13 +84,28 @@ export class FormsService {
     }
   }
 
+  async deleteCriterion(formUuid: string, id: string) : Promise<{success: boolean, error?: unknown | undefined}> {
+    try {
+      const deletedDocument = await deleteDoc(doc(firestore, FORMS, formUuid, CRITERIAS, id));
+      console.log(deletedDocument);
+      return { success: true }
+    } catch (error) {
+      return { success: false, error }
+    }
+  }
+
   async getForms() {
     try {
       const querySnapshot = await getDocs(collection(firestore, FORMS))
       const forms = await Promise.all(querySnapshot.docs.map(async (doc) => {
         const data = doc.data() as FormStructure
         const criteriaDocuments = await getDocs(collection(firestore, FORMS, data.id!!, CRITERIAS));
-        const criteria = criteriaDocuments.docs.map((doc) => doc.data() as EvaluationCriterion);
+        const criteria = criteriaDocuments.docs.map((doc) => {
+          const criterion = doc.data() as EvaluationCriterion;
+          criterion.userAnswer = criterion.userAnswer || [];
+          criterion.saved = true; // Criteria from database are saved
+          return criterion;
+        });
         return {
           ...data,
           criteria: criteria

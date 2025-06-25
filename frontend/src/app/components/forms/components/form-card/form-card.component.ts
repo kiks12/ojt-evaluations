@@ -51,9 +51,8 @@ export class FormCardComponent {
       event.stopPropagation();
     }
     this.closeDropdown();
-    // this.edit.emit(this.form);
-    // Alternative: Navigate directly
-    this.router.navigate(['/forms', this.form.id || this.form.title]);
+    // Navigate to edit route
+    this.router.navigate(['/forms', this.form.id, 'edit']);
   }
 
   onDelete(event?: Event) {
@@ -79,13 +78,14 @@ export class FormCardComponent {
       event.stopPropagation();
     }
     this.closeDropdown();
-    // this.share.emit(this.form);
+    this.generateShareableLink();
   }
 
   onPreview(event: Event) {
     event.stopPropagation();
     this.closeDropdown();
-    // this.preview.emit(this.form);
+    // Navigate to preview page for form editing/viewing
+    this.router.navigate(['/forms', this.form.id, 'preview']);
   }
 
   onAnalytics(event: Event) {
@@ -101,5 +101,20 @@ export class FormCardComponent {
       case 'archived': return 'Archived';
       default: return 'Draft';
     }
+  }
+
+  generateShareableLink(): void {
+    // Generate shareable link for public form access
+    const baseUrl = window.location.origin;
+    const shareableUrl = `${baseUrl}/forms/${this.form.id}/fill`;
+    
+    // Copy to clipboard
+    navigator.clipboard.writeText(shareableUrl).then(() => {
+      alert(`Shareable link copied to clipboard!\n\nLink: ${shareableUrl}\n\nAnyone with this link can fill out the form.`);
+    }).catch(err => {
+      console.error('Failed to copy link to clipboard:', err);
+      // Fallback: show the link in a prompt
+      prompt('Copy this shareable link:', shareableUrl);
+    });
   }
 }

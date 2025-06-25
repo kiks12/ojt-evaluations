@@ -23,9 +23,13 @@ export class EditFormComponent implements OnInit {
     label: '',
     type: 'text',
     required: false,
-    options: []
+    options: [],
+    answer: [],
+    userAnswer: [],
+    saved: false
   };
   optionInput = '';
+  answerInput = '';
   inputTypes = [
     { value: 'text', label: 'Text Input' },
     { value: 'textarea', label: 'Text Area' },
@@ -43,8 +47,16 @@ export class EditFormComponent implements OnInit {
       if (!formUuid) return alert("Form UUID does not exist");
       const result = await this.formsService.getForm(formUuid);
       if (!result) return alert("Form not found");
+      // Ensure all criteria have answer and userAnswer arrays initialized
+      const criteriaWithAnswers = result.criteria.map(criterion => ({
+        ...criterion,
+        answer: criterion.answer || [],
+        userAnswer: criterion.userAnswer || [],
+        saved: criterion.saved !== undefined ? criterion.saved : true // Default to true for existing criteria
+      }));
       this.formStructure = {
         ...result,
+        criteria: criteriaWithAnswers
       }
     })
   }
@@ -57,7 +69,10 @@ export class EditFormComponent implements OnInit {
       label: this.newCriterion.label,
       type: this.newCriterion.type || 'text',
       required: this.newCriterion.required || false,
-      options: this.newCriterion.options || []
+      options: this.newCriterion.options || [],
+      answer: this.newCriterion.answer || [],
+      userAnswer: this.newCriterion.userAnswer || [],
+      saved: false // New criteria are not saved yet
     };
 
     this.formStructure.criteria.push(criterion);
@@ -66,13 +81,46 @@ export class EditFormComponent implements OnInit {
       label: '',
       type: 'text',
       required: false,
-      options: []
+      options: [],
+      answer: [],
+      userAnswer: [],
+      saved: false
     };
     this.optionInput = '';
+    this.answerInput = '';
   }
 
-  removeCriterion(id: string): void {
-    this.formStructure.criteria = this.formStructure.criteria.filter(c => c.id !== id);
+  async removeCriterion(id: string): Promise<void> {
+    const criterion = this.formStructure.criteria.find(c => c.id === id);
+    if (!criterion) return;
+
+    // Show confirmation dialog
+    const confirmMessage = criterion.saved 
+      ? `Are you sure you want to delete "${criterion.label}"? This action cannot be undone.`
+      : `Are you sure you want to remove "${criterion.label}"?`;
+    
+    if (!confirm(confirmMessage)) {
+      return; // User cancelled
+    }
+
+    if (criterion.saved) {
+      // If criterion is saved in database, delete it using the service
+      try {
+        const result = await this.formsService.deleteCriterion(this.formStructure.id!, id);
+        if (result.success) {
+          // Remove from local array after successful deletion
+          this.formStructure.criteria = this.formStructure.criteria.filter(c => c.id !== id);
+        } else {
+          alert('Failed to delete criterion. Please try again.');
+        }
+      } catch (error) {
+        console.error('Error deleting criterion:', error);
+        alert('An error occurred while deleting the criterion.');
+      }
+    } else {
+      // If not saved, just filter out from local array
+      this.formStructure.criteria = this.formStructure.criteria.filter(c => c.id !== id);
+    }
   }
 
   addOption(): void {
@@ -92,12 +140,14 @@ export class EditFormComponent implements OnInit {
   }
 
   onTypeChange(): void {
-    this.newCriterion.options = []
+    this.newCriterion.options = [];
+    this.newCriterion.answer = [];
     this.optionInput = '';
+    this.answerInput = '';
   }
 
   needsOptions(): boolean {
-    return this.newCriterion.type === 'radio' || this.newCriterion.type === 'select';
+    return this.newCriterion.type === 'radio' || this.newCriterion.type === 'select' || this.newCriterion.type === 'checkbox';
   }
 
   canAddCriterion(): boolean {
@@ -114,9 +164,16 @@ export class EditFormComponent implements OnInit {
       updatedAt: Timestamp.now()
     }
     console.log('Form Structure:', updatedForm);
-    alert('Form structure saved! Check console for details.');
     const {success, error} = await this.formsService.updateForm(this.formStructure);
-    if (error) alert(error);
+    if (success) {
+      this.formStructure.criteria.forEach(criterion => {
+        criterion.saved = true;
+      });
+      alert('Form structure saved successfully!');
+    } else {
+      console.log(error);
+      alert('Failed to save form: ' + error);
+    }
   }
 
   canSaveForm(): boolean {
@@ -125,5 +182,48 @@ export class EditFormComponent implements OnInit {
 
   getRatingArray(): number[] {
     return [1, 2, 3, 4, 5];
+  }
+
+  shouldShowAnswer(type: string): boolean {
+    return type === 'radio' || type === 'checkbox';
+  }
+
+  addAnswer(): void {
+    if (!this.answerInput.trim()) return;
+
+    if (!this.newCriterion.answer) {
+      this.newCriterion.answer = [];
+    }
+    this.newCriterion.answer.push(this.answerInput.trim());
+    this.answerInput = '';
+  }
+
+  removeAnswer(index: number): void {
+    if (this.newCriterion.answer) {
+      this.newCriterion.answer.splice(index, 1);
+    }
+  }
+
+  setCorrectAnswer(option: string): void {
+    // For radio buttons, only one answer is allowed
+    this.newCriterion.answer = [option];
+  }
+
+  isCorrectAnswer(option: string): boolean {
+    return this.newCriterion.answer?.includes(option) || false;
+  }
+
+  toggleCorrectAnswer(option: string): void {
+    if (!this.newCriterion.answer) {
+      this.newCriterion.answer = [];
+    }
+    const index = this.newCriterion.answer.indexOf(option);
+    if (index > -1) {
+      // If already exists, remove it (toggle off)
+      this.newCriterion.answer.splice(index, 1);
+    } else {
+      // Otherwise, add it (toggle on)
+      this.newCriterion.answer.push(option);
+    }
   }
 }

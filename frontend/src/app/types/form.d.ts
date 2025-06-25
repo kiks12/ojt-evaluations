@@ -19,6 +19,9 @@ export interface EvaluationCriterion {
   type: 'text' | 'textarea' | 'rating' | 'checkbox' | 'radio' | 'select';
   required: boolean;
   options?: string[];
+  answer?: string[]; // New optional field
+  userAnswer: string[]; // Default array of strings for user responses
+  saved: boolean; // Indicates if criterion is saved to database
 }
 
 export interface FormStructure extends FormData {
