@@ -17,6 +17,7 @@ export class EditFormComponent implements OnInit {
   formStructure: FormStructure = {
     title: '',
     description: '',
+    status: 'draft',
     criteria: []
   };
   newCriterion: Partial<EvaluationCriterion> = {
@@ -161,10 +162,11 @@ export class EditFormComponent implements OnInit {
   async saveForm(): Promise<void> {
     const updatedForm : FormStructure = {
       ...this.formStructure,
-      updatedAt: Timestamp.now()
+      updatedAt: Timestamp.now(),
+      status: this.formStructure.status || 'draft'
     }
     console.log('Form Structure:', updatedForm);
-    const {success, error} = await this.formsService.updateForm(this.formStructure);
+    const {success, error} = await this.formsService.updateForm(updatedForm);
     if (success) {
       this.formStructure.criteria.forEach(criterion => {
         criterion.saved = true;
