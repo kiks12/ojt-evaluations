@@ -4,7 +4,7 @@ import { FormsService } from '../../services/forms.service';
 import { FormCardComponent } from './components/form-card/form-card.component';
 import { CommonModule } from '@angular/common';
 import { FormModalComponent } from './components/form-modal/form-modal.component';
-import { FormData } from '../../types/form';
+import { FormData, FormStructure } from '../../types/form';
 import { TimeUtilityService } from '../../services/time-utility.service';
 
 @Component({
@@ -120,13 +120,13 @@ export class FormsComponent implements OnInit {
     this.viewMode = mode;
   }
 
-  getFilteredForms(): FormData[] {
+  getFilteredForms(): FormStructure[] {
     let filtered = this.formsService.forms();
 
     // Apply search filter
     if (this.searchQuery().trim()) {
       const query = this.searchQuery().toLowerCase();
-      filtered = filtered.filter((form: FormData) =>
+      filtered = filtered.filter((form: FormStructure) =>
         form.title.toLowerCase().includes(query) ||
         form.description.toLowerCase().includes(query)
       );
@@ -134,7 +134,7 @@ export class FormsComponent implements OnInit {
 
     // Apply status filters
     if (this.activeFilters.length > 0) {
-      filtered = filtered.filter((form: FormData) =>
+      filtered = filtered.filter((form: FormStructure) =>
         this.activeFilters.includes(form.status ?? "No Status")
       );
     }
@@ -150,14 +150,14 @@ export class FormsComponent implements OnInit {
 
     if (this.searchQuery().trim()) {
       const query = this.searchQuery().toLowerCase();
-      filtered = filtered.filter((form: FormData) =>
+      filtered = filtered.filter((form: FormStructure) =>
         form.title.toLowerCase().includes(query) ||
         form.description.toLowerCase().includes(query)
       );
     }
 
     if (this.activeFilters.length > 0) {
-      filtered = filtered.filter((form: FormData) =>
+      filtered = filtered.filter((form: FormStructure) =>
         this.activeFilters.includes(form.status ?? "No Status")
       );
     }
@@ -207,11 +207,11 @@ export class FormsComponent implements OnInit {
   }
 
   // Form action handlers
-  onEditForm(form: FormData) {
+  onEditForm(form: FormStructure) {
     this.router.navigate(['/forms', form.id, 'edit']);
   }
 
-  async onDeleteForm(form: FormData) {
+  async onDeleteForm(form: FormStructure) {
     if (!form.id) return alert("Form ID does not exist");
     if (confirm(`Are you sure you want to delete "${form.title}"?`)) {
       const { success, error } = await this.formsService.deleteForm(form.id);
@@ -221,21 +221,21 @@ export class FormsComponent implements OnInit {
     }
   }
 
-  onDuplicateForm(form: FormData) {
+  onDuplicateForm(form: FormStructure) {
     // Handle duplicate logic
     console.log('Duplicating form:', form);
   }
 
-  onShareForm(form: FormData) {
+  onShareForm(form: FormStructure) {
     // Handle share logic
     console.log('Sharing form:', form);
   }
 
-  onPreviewForm(form: FormData) {
+  onPreviewForm(form: FormStructure) {
     this.router.navigate(['/forms', form.id, 'preview']);
   }
 
-  onViewAnalytics(form: FormData) {
+  onViewAnalytics(form: FormStructure) {
     this.router.navigate(['/forms', form.id, 'analytics']);
   }
 

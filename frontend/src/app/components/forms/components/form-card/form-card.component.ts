@@ -1,8 +1,7 @@
 import { CommonModule, Time } from '@angular/common';
-import { Component, Input, Output, EventEmitter, HostListener, inject } from '@angular/core';
+import { Component, Input, Output, EventEmitter, HostListener, inject, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { FormData } from '../../../../types/form';
-import { Timestamp } from 'firebase/firestore';
+import { FormData, FormStructure } from '../../../../types/form';
 import { TimeUtilityService } from '../../../../services/time-utility.service';
 
 @Component({
@@ -11,20 +10,24 @@ import { TimeUtilityService } from '../../../../services/time-utility.service';
   styleUrls: ['./form-card.component.css'],
   imports: [CommonModule]
 })
-export class FormCardComponent {
-  @Input() form!: FormData;
-  @Output() delete = new EventEmitter<FormData>();
-  @Output() edit? = new EventEmitter<FormData>();
-  @Output() duplicate? = new EventEmitter<FormData>();
-  @Output() share? = new EventEmitter<FormData>();
-  @Output() preview? = new EventEmitter<FormData>();
-  @Output() analytics? = new EventEmitter<FormData>();
-  @Output() cardClick? = new EventEmitter<FormData>();
+export class FormCardComponent implements OnInit {
+  @Input() form!: FormStructure;
+  @Output() delete = new EventEmitter<FormStructure>();
+  @Output() edit? = new EventEmitter<FormStructure>();
+  @Output() duplicate? = new EventEmitter<FormStructure>();
+  @Output() share? = new EventEmitter<FormStructure>();
+  @Output() preview? = new EventEmitter<FormStructure>();
+  @Output() analytics? = new EventEmitter<FormStructure>();
+  @Output() cardClick? = new EventEmitter<FormStructure>();
   timeUtilService = inject(TimeUtilityService);
 
   showDropdown = false;
 
   constructor(private router: Router) {}
+
+  ngOnInit(): void {
+    console.log(this.form);
+  }
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: Event) {

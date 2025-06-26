@@ -4,6 +4,9 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FormsService } from '../../services/forms.service';
 import { EvaluationCriterion, FormStructure } from '../../types/form';
+import { FormResponseService } from '../../services/form-response.service';
+import { v4 as uuidv4 } from 'uuid';
+import { Timestamp } from 'firebase/firestore';
 
 @Component({
   selector: 'app-form-fill',
@@ -13,11 +16,14 @@ import { EvaluationCriterion, FormStructure } from '../../types/form';
 })
 export class FormFillComponent implements OnInit {
   formsService = inject(FormsService);
+  formResponseService = inject(FormResponseService);
   formStructure: FormStructure | null = null;
   isLoading = true;
   isSubmitting = false;
   isSubmitted = false;
   errorMessage = '';
+  name: string = '';
+  email: string = '';
 
   constructor(
     private route: ActivatedRoute,
@@ -95,7 +101,7 @@ export class FormFillComponent implements OnInit {
 
   isFormValid(): boolean {
     if (!this.formStructure) return false;
-
+    if (!this.name.trim() || !this.email.trim()) return false;
     return this.formStructure.criteria.every(criterion => {
       if (!criterion.required) return true;
       return criterion.userAnswer && criterion.userAnswer.length > 0;
@@ -111,21 +117,22 @@ export class FormFillComponent implements OnInit {
       alert('Please complete all required fields before submitting.');
       return;
     }
-
     this.isSubmitting = true;
-
     try {
-      // Here you would typically submit the form responses to your backend
-      // For now, we'll just simulate a successful submission
-      console.log('Form responses:', this.formStructure.criteria.map(c => ({
+      // Build answers array for FormResponse
+      const answers = this.formStructure.criteria.map(c => ({
         criterionId: c.id,
-        label: c.label,
-        userAnswer: c.userAnswer
-      })));
-
-      // Simulate API call
+        answer: (c.userAnswer && Array.isArray(c.userAnswer)) ? c.userAnswer.join(', ') : ''
+      }));
+      this.formResponseService.createResponse(this.formStructure.id!, {
+        id: uuidv4(),
+        formId: this.formStructure.id!,
+        name: this.name,
+        email: this.email,
+        createdAt: Timestamp.now(),
+        answers
+      });
       await new Promise(resolve => setTimeout(resolve, 1000));
-
       this.isSubmitted = true;
       this.isSubmitting = false;
     } catch (error) {
@@ -137,10 +144,11 @@ export class FormFillComponent implements OnInit {
 
   resetForm(): void {
     if (!this.formStructure) return;
-
     this.formStructure.criteria.forEach(criterion => {
       criterion.userAnswer = [];
     });
+    this.name = '';
+    this.email = '';
     this.isSubmitted = false;
   }
 
