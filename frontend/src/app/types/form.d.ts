@@ -24,6 +24,22 @@ export interface EvaluationCriterion {
   saved: boolean; // Indicates if criterion is saved to database
 }
 
+export interface FormResponseAnswer {
+  criterionId: string;
+  answer: string;
+}
+
+export interface FormResponse {
+  id: string;
+  formId: string;
+  name: string;
+  email: string;
+  createdAt: Timestamp;
+  updatedAt?: Timestamp;
+  answers: FormResponseAnswer[];
+}
+
 export interface FormStructure extends FormData {
   criteria: EvaluationCriterion[];
+  responses?: FormResponse[];
 }
