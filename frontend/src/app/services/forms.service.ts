@@ -1,9 +1,9 @@
 import { Injectable, signal } from '@angular/core';
 import { collection, deleteDoc, doc, getDoc, getDocs, setDoc } from "firebase/firestore"
 import { firestore } from '../../../firebase/firebase';
-import { CRITERIAS, FORMS } from '../../../firebase/collections';
+import { CRITERIAS, FORMS, RESPONSES } from '../../../firebase/collections';
 import {v4 as uuidv4} from 'uuid';
-import { EvaluationCriterion, FormData, FormStructure } from '../types/form';
+import { EvaluationCriterion, FormData, FormResponse, FormStructure } from '../types/form';
 
 @Injectable({
   providedIn: 'root'
@@ -29,9 +29,15 @@ export class FormsService {
         criterion.saved = true; // Criteria from database are saved
         return criterion;
       });
+      const responsesDocuments = await getDocs(collection(firestore, FORMS, id, RESPONSES));
+      const responses = responsesDocuments.docs.map((doc) => {
+        const response = doc.data() as FormResponse;
+        return response;
+      });
       return {
         ...(document.data() as FormStructure),
-        criteria: criteria
+        criteria: criteria,
+        responses: responses
       }
     } catch (error) {
       return;
@@ -106,9 +112,15 @@ export class FormsService {
           criterion.saved = true; // Criteria from database are saved
           return criterion;
         });
+        const responsesDocuments = await getDocs(collection(firestore, FORMS, data.id!!, RESPONSES));
+        const responses = responsesDocuments.docs.map((doc) => {
+          const response = doc.data() as FormResponse;
+          return response;
+        });
         return {
           ...data,
-          criteria: criteria
+          criteria: criteria,
+          responses: responses
         }
       }))
       this.forms.set(forms);
