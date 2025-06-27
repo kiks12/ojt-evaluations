@@ -4,6 +4,8 @@ import { EvaluationFormComponent } from './components/evaluation-form/evaluation
 import { EditFormComponent } from './components/forms/edit-form/edit-form.component';
 import { FormFillComponent } from './components/form-fill/form-fill.component';
 import { FormPreviewComponent } from './components/form-preview/form-preview.component';
+import { ResponsesComponent } from './components/responses/responses.component';
+// Removed import of ResponsesComponent due to module error
 
 export const routes: Routes = [
   {
@@ -25,6 +27,10 @@ export const routes: Routes = [
   {
     path: "forms/:id/fill",
     component: FormFillComponent
+  },
+  {
+    path: "forms/:id/responses",
+    component: ResponsesComponent
   },
   {
     path: "forms/:id",
