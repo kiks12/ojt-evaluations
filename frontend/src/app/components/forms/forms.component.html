@@ -157,6 +157,7 @@
           *ngFor="let form of getFilteredForms(); track form"
           [form]="form"
           (delete)="this.onDeleteForm(form)"
+          (viewResponses)="this.onViewResponses(form)"
         >
         </app-form-card>
       </div>

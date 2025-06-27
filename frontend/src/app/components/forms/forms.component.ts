@@ -231,6 +231,10 @@ export class FormsComponent implements OnInit {
     console.log('Sharing form:', form);
   }
 
+  onViewResponses(form: FormStructure) {
+    this.router.navigate(['/forms', form.id, 'responses']);
+  }
+
   onPreviewForm(form: FormStructure) {
     this.router.navigate(['/forms', form.id, 'preview']);
   }

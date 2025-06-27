@@ -71,3 +71,7 @@ button:focus {
     padding-right: 1rem;
   }
 }
+
+.form-card-dropdown {
+  z-index: 1000 !important;
+}

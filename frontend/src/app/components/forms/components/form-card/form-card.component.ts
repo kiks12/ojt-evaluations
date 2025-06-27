@@ -19,6 +19,7 @@ export class FormCardComponent implements OnInit {
   @Output() preview? = new EventEmitter<FormStructure>();
   @Output() analytics? = new EventEmitter<FormStructure>();
   @Output() cardClick? = new EventEmitter<FormStructure>();
+  @Output() viewResponses = new EventEmitter<FormStructure>();
   timeUtilService = inject(TimeUtilityService);
 
   showDropdown = false;
@@ -95,6 +96,14 @@ export class FormCardComponent implements OnInit {
     event.stopPropagation();
     this.closeDropdown();
     // this.analytics.emit(this.form);
+  }
+
+  onViewResponses(event?: Event) {
+    if (event) {
+      event.stopPropagation();
+    }
+    this.closeDropdown();
+    this.router.navigate(['/forms', this.form.id, 'responses']);
   }
 
   getStatusLabel(status?: string): string {
