@@ -32,12 +32,12 @@ export class EditFormComponent implements OnInit {
   optionInput = '';
   answerInput = '';
   inputTypes = [
-    { value: 'text', label: 'Text Input' },
+    // { value: 'text', label: 'Text Input' },
     { value: 'textarea', label: 'Text Area' },
     { value: 'rating', label: 'Rating Scale (1-5)' },
-    { value: 'checkbox', label: 'Checkbox' },
-    { value: 'radio', label: 'Radio Buttons' },
-    { value: 'select', label: 'Dropdown Select' }
+    // { value: 'checkbox', label: 'Checkbox' },
+    // { value: 'radio', label: 'Radio Buttons' },
+    // { value: 'select', label: 'Dropdown Select' }
   ];
 
   constructor(private route: ActivatedRoute) {}
